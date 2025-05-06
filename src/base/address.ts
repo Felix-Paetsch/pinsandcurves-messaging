@@ -1,6 +1,7 @@
 import Core from "../communicator/core";
 import { ICommunicator } from "./communicator";
 import Message from "./message";
+import { v4 as uuidv4 } from 'uuid';
 
 export default class Address {
     constructor(
@@ -40,4 +41,8 @@ export default class Address {
             lines[1].split(" ")[1],
         )
     }
+}
+
+export function new_local_address() {
+    return new Address(Core().host_id, uuidv4())
 }

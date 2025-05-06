@@ -1,12 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
-import Communicator from "../base/communicator";
+import Communicator, { InternalEvent } from "../base/communicator";
 import Address from "../base/address";
 import Message from '../base/message';
 import { CommunicationError } from '../base/communication_error';
 
 export class CoreCommunicator extends Communicator {
     private known_addresses: Address[] = [this.get_address()];
-    constructor(public host_id: string) {
+    constructor(public host_id: string = uuidv4()) {
         super(new Address(host_id, "core"), "core", "MSG_ALL");
     }
 
@@ -69,17 +69,20 @@ export class CoreCommunicator extends Communicator {
             a => !a.agrees_with(address)
         );
     }
+
+    internal_event(event: InternalEvent, data: any = null, _trigger: Communicator = this) { }
 }
 
 let coreInstance: CoreCommunicator | null = null;
 
-export function initCore(host?: string | CoreCommunicator): void {
+export function initCore(host?: string | CoreCommunicator): CoreCommunicator {
     if (coreInstance) throw new Error("Core already initialized.");
     if (host instanceof CoreCommunicator) {
         coreInstance = host;
-        return;
+        return coreInstance;
     }
     coreInstance = new CoreCommunicator(host || uuidv4());
+    return coreInstance;
 }
 
 export function CoreIsInitialized(): boolean {

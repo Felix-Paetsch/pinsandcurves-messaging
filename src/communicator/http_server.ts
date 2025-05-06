@@ -16,6 +16,10 @@ export default class HTTPServerCommunicator extends Communicator {
             this.modality = "MSG_SOURCE";
             this.internal_event("INITIALIZED");
         });
+        this.server.on('error', (e) => {
+            this.modality = "INACTIVE";
+            this.internal_event("INIT_ERROR", e);
+        });
     }
 
     private handleRequest(

@@ -1,11 +1,12 @@
-import { CoreCommunicator } from "../communicator/core";
+import { CoreCommunicator, CoreIsInitialized } from "../communicator/core";
 import Core from "../communicator/core";
 import Address from "./address";
+import { communicator_event, CommunicatorEventType } from "./event_pool";
 import Message from "./message";
 
 type CommunicatorType = string;
-type CommunicatorModality = "MSG_SINK" | "MSG_SOURCE" | "MSG_ALL" | "INITIALIZING";
-type InternalEvent = string;
+type CommunicatorModality = "MSG_SINK" | "MSG_SOURCE" | "MSG_ALL" | "INITIALIZING" | "INACTIVE";
+export type InternalEvent = CommunicatorEventType;
 
 export interface ICommunicator {
     type: CommunicatorType;
@@ -22,7 +23,7 @@ export default class Communicator implements ICommunicator {
         public modality: CommunicatorModality
     ) {
         address.set_communicator(this);
-        if (!(this instanceof CoreCommunicator)) {
+        if (!(this instanceof CoreCommunicator) || CoreIsInitialized()) {
             Core().add_known_address(address);
         }
     }
@@ -46,9 +47,6 @@ export default class Communicator implements ICommunicator {
     }
 
     internal_event(event: InternalEvent, data: any = null) {
-        if (event == "MSG_ERROR") {
-            console.log(data.message);
-            throw new Error(`The above message encountered the following error: "${data.err}"`);
-        }
+        communicator_event(event, data, this);
     }
 }

@@ -1,7 +1,7 @@
-import Message from "./base/message";
-import HTTPClientCommunicator from "./communicator/http_client";
-import Address from "./base/address";
-import { initCore } from "./communicator/core";
+import Message from "../../base/message";
+import HTTPClientCommunicator from "../../communicator/http_client";
+import Address from "../../base/address";
+import { initCore } from "../../communicator/core";
 
 const core1_id = "core1";
 const core2_id = "core2";
