@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import Communicator, { InternalEvent } from "../base/communicator";
+import Communicator, { ICommunicator, InternalEvent } from "../base/communicator";
 import Address from "../base/address";
 import Message from '../base/message';
 import { CommunicationError } from '../base/communication_error';
@@ -70,7 +70,7 @@ export class CoreCommunicator extends Communicator {
         );
     }
 
-    internal_event(event: InternalEvent, data: any = null, _trigger: Communicator = this) { }
+    internal_event(event: InternalEvent, data: any = null, _trigger: ICommunicator = this) { }
 }
 
 let coreInstance: CoreCommunicator | null = null;

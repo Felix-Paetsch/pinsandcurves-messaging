@@ -1,7 +1,7 @@
 import { ICommunicator } from "./communicator";
 import { v4 as uuidv4 } from "uuid";
 
-export type CommunicatorEventType = "MSG_ERROR" | "INITIALIZED" | "INIT_ERROR" | "FREEFORM";
+export type CommunicatorEventType = "MSG_ERROR" | "INITIALIZED" | "INIT_ERROR" | "RECIEVE_MSG" | "FREEFORM";
 export type CommunicatorEvent = {
     type: CommunicatorEventType,
     data: any,

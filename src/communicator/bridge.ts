@@ -1,9 +1,9 @@
 import Address from "../base/address";
 import Message from "../base/message";
-import Communicator from "../base/communicator";
+import Communicator, { ICommunicator } from "../base/communicator";
 
 export default class BridgeCommunicator extends Communicator {
-    constructor(addr: Address, private bridge_point: Communicator) {
+    constructor(addr: Address, private bridge_point: ICommunicator) {
         super(addr, "bridge", bridge_point.modality);
     }
 
