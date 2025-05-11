@@ -7,8 +7,7 @@ const coreC = client_comm(addresses.coreC);
 
 console.log("Restart B");
 
-subscribe_to("RECIEVE_MSG", (e) => {
-    const msg: Message = e.data;
+local.listen((msg) => {
     console.log(msg.content);
 
     if (msg.content == "Hi A -> B") {

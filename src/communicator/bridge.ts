@@ -7,7 +7,7 @@ export default class BridgeCommunicator extends Communicator {
         super(addr, "bridge", bridge_point.modality);
     }
 
-    send(msg: Message): void {
+    transmit_message(msg: Message): void {
         this.bridge_point.send(msg);
     }
 

@@ -11,7 +11,6 @@ const coreC = client_comm(addresses.coreC);
 console.log("Restart A");
 
 coreB.message("Hi A -> B");
-subscribe_to("RECIEVE_MSG", (e) => {
-    const msg: Message = e.data;
+local.listen((msg) => {
     console.log(msg.content);
 });

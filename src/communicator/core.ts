@@ -10,7 +10,7 @@ export class CoreCommunicator extends Communicator {
         super(new Address(host_id, "core"), "core", "MSG_ALL");
     }
 
-    send(msg: Message) {
+    transmit_message(msg: Message) {
         if (msg.target.agrees_with(this.get_address())) {
             return this.receive(msg);
         }

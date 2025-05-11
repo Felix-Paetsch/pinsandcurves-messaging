@@ -1,8 +1,18 @@
 import Address from "./address";
+import { ICommunicator } from "./communicator";
 
 type MessageMetaData = any;
+export type ComputedMessageData = {
+    message: Message;
+    local_address: Address;
+    communicator: ICommunicator;
+    incomming: Boolean,
+    [key: string]: any;
+};
 
 export default class Message {
+    public computed_data: ComputedMessageData | null = null;
+
     constructor(
         public target: Address,
         public content: string = "",

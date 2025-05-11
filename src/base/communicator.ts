@@ -4,7 +4,7 @@ import { IProxyCommunicator, ProxyCommunicator } from "../communicator/proxy";
 import Address from "./address";
 import { communicator_event, CommunicatorEventType } from "./event_pool";
 import Message from "./message";
-import { Middleware } from "./middleware";
+import { Middleware, MessageListener } from "./middleware";
 
 type CommunicatorType = string;
 type CommunicatorModality = "MSG_SINK" | "MSG_SOURCE" | "MSG_ALL" | "INITIALIZING" | "INACTIVE";
@@ -14,10 +14,12 @@ export interface ICommunicator {
     type: CommunicatorType;
     modality: CommunicatorModality;
     send(msg: Message): void;
+    transmit_message(msg: Message): void;
     receive(msg: Message): void;
     get_address(): Address;
 
-    // use(m: Middleware): void;
+    use(m: Middleware): void;
+    listen(m: MessageListener): void;
     proxify(): IProxyCommunicator;
 
     // Sugar;
@@ -25,6 +27,9 @@ export interface ICommunicator {
 }
 
 export default class Communicator implements ICommunicator {
+    private middleware: Middleware[] = [];
+    private msg_listeners: MessageListener[] = [];
+
     constructor(
         private address: Address,
         public type: CommunicatorType,
@@ -37,6 +42,26 @@ export default class Communicator implements ICommunicator {
     }
 
     send(msg: Message) {
+        msg.computed_data = {
+            message: msg,
+            local_address: this.get_address(),
+            communicator: this,
+            incomming: this.get_address().agrees_with(msg.target)
+        };
+
+        let idx = 0;
+        const runNext = () => {
+            const mw = this.middleware[idx++];
+            if (mw) {
+                mw(msg, runNext);
+            } else {
+                this.transmit_message(msg);
+            }
+        };
+        runNext();
+    }
+
+    transmit_message(msg: Message) {
         if (msg.target.agrees_with(this.address)) {
             return this.receive(msg);
         } else {
@@ -45,6 +70,10 @@ export default class Communicator implements ICommunicator {
     }
 
     receive(msg: Message) {
+        for (const ml of this.msg_listeners) {
+            ml(msg);
+        }
+
         this.internal_event("RECIEVE_MSG", msg);
     }
 
@@ -60,9 +89,13 @@ export default class Communicator implements ICommunicator {
         communicator_event(event, data, this);
     }
 
-    /*use(m: Middleware) { }
-    use_in(m: Middleware) { }
-    use_out(m: Middleware) { }*/
+    use(m: Middleware) {
+        this.middleware.push(m);
+    }
+
+    listen(m: MessageListener): void {
+        this.msg_listeners.push(m);
+    }
 
     proxify(): IProxyCommunicator {
         return ProxyCommunicator(this);

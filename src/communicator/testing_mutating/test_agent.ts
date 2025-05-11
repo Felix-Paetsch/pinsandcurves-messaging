@@ -12,10 +12,10 @@ export default class MockAgentCommunicator extends Communicator {
         super(new Address(host_id, plugin_id), "mock agent", "MSG_ALL");
     }
 
-    send(msg: Message): void {
+    transmit_message(msg: Message): void {
         const serialized = msg.serialize();
         const deserialized = Message.deserialize(serialized);
-        super.send(deserialized);
+        super.transmit_message(deserialized);
     }
 
     receive(msg: Message): void {

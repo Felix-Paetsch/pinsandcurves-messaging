@@ -18,7 +18,7 @@ export default class HTTPClientCommunicator extends Communicator {
         this.endpoint = new URL(endpointUrl);
     }
 
-    send(msg: Message): void {
+    transmit_message(msg: Message): void {
         const data = msg.serialize();
         const isHttps = this.endpoint.protocol === 'https:';
         const transport = isHttps ? https : http;

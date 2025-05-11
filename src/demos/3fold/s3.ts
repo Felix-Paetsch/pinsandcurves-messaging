@@ -8,8 +8,7 @@ const local = server_comm(addresses.coreC);
 
 console.log("Restart C");
 
-subscribe_to("RECIEVE_MSG", (e) => {
-    const msg: Message = e.data;
+local.listen((msg) => {
     console.log(msg.content);
     coreB.message("Hi back C -> B")
 });
