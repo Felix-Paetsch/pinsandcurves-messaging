@@ -8,7 +8,7 @@ export default class BridgeCommunicator extends Communicator {
     }
 
     transmit_message(msg: Message): void {
-        this.bridge_point.send(msg);
+        this.bridge_point.outgoing_message(msg);
     }
 
     receive(_msg: Message): void {

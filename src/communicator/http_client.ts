@@ -36,10 +36,11 @@ export default class HTTPClientCommunicator extends Communicator {
             this.handleResponse(res, msg);
         });
 
-        req.on('error', () => {
+        req.on('error', (e) => {
             this.internal_event("MSG_ERROR", {
                 message: msg,
-                err: CommunicationError.COMMUNICATION_FAILED
+                err: e,
+                err_type: CommunicationError.COMMUNICATION_FAILED
             });
         });
 
@@ -56,7 +57,7 @@ export default class HTTPClientCommunicator extends Communicator {
             if (statusCode === undefined) {
                 this.internal_event("MSG_ERROR", {
                     message: msg,
-                    err: CommunicationError.INACCESSIBLE
+                    err_type: CommunicationError.INACCESSIBLE
                 });
                 return;
             }
@@ -64,7 +65,7 @@ export default class HTTPClientCommunicator extends Communicator {
             if (statusCode < 200 || statusCode >= 300) {
                 this.internal_event("MSG_ERROR", {
                     message: msg,
-                    err: CommunicationError.ERROR_RESPONSE
+                    err_type: CommunicationError.ERROR_RESPONSE
                 });
                 return;
             }
@@ -78,7 +79,7 @@ export default class HTTPClientCommunicator extends Communicator {
             if (text.toLowerCase().startsWith("error")) {
                 this.internal_event("MSG_ERROR", {
                     message: msg,
-                    err: CommunicationError.ERROR_RESPONSE
+                    err_type: CommunicationError.ERROR_RESPONSE
                 });
                 return;
             }
@@ -89,7 +90,7 @@ export default class HTTPClientCommunicator extends Communicator {
             } catch {
                 this.internal_event("MSG_ERROR", {
                     message: msg,
-                    err: CommunicationError.ERROR_RESPONSE
+                    err_type: CommunicationError.ERROR_RESPONSE
                 });
             }
         });

@@ -1,16 +1,38 @@
+import Core from "../communicator/core";
 import Address from "./address";
 import { ICommunicator } from "./communicator";
 
-type MessageMetaData = any;
+export type MessageMetaData = Record<string, any>;;
 export type ComputedMessageData = {
     message: Message;
     local_address: Address;
     communicator: ICommunicator;
-    incomming: Boolean,
+    message_state: "incomming" | "outgoing" | "recieving",
     [key: string]: any;
 };
 
-export default class Message {
+export interface IPreMessage {
+    content: string;
+    meta_data: MessageMetaData;
+    computed_data: ComputedMessageData | null;
+    set_target: (addr: Address) => Message;
+};
+
+export class PreMessage implements IPreMessage {
+    public computed_data: ComputedMessageData | null = null;
+    constructor(
+        public content: string = "",
+        public meta_data: MessageMetaData = {}
+    ) { }
+
+    set_target(target: Address) {
+        const res = new Message(target, this.content, this.meta_data);
+        res.computed_data = this.computed_data;
+        return res;
+    }
+}
+
+export default class Message implements IPreMessage {
     public computed_data: ComputedMessageData | null = null;
 
     constructor(
@@ -20,7 +42,7 @@ export default class Message {
     ) { }
 
     send() {
-        this.target.send(this);
+        Core().send(this);
     }
 
     serialize(): string {
@@ -29,6 +51,11 @@ export default class Message {
             meta_data: this.meta_data,
             target: this.target.serialize()
         })
+    }
+
+    set_target(addr: Address) {
+        this.target = addr;
+        return this;
     }
 
     static deserialize(str: string): Message {

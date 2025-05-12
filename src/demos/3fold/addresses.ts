@@ -2,7 +2,7 @@ import Address from "../../base/address";
 import HTTPClientCommunicator from "../../communicator/http_client";
 import HTTPServerCommunicator from "../../communicator/http_server";
 import { ProxyCommunicator } from "../../communicator/proxy";
-import { Lossy } from "../../communicator/proxy_methods/lossy";
+import { Lossy } from "../../messaging_extensions/proxy_methods/lossy";
 
 type HttpAddress = {
     port: number
@@ -23,7 +23,7 @@ export function server_comm(c: HttpAddress) {
     );
 
     const p = ProxyCommunicator(original);
-    p.apply_proxy(Lossy(0.9));
+    p.apply_proxy(Lossy(1));
     return p;
 }
 
@@ -34,6 +34,6 @@ export function client_comm(c: HttpAddress) {
     );
 
     const p = ProxyCommunicator(original);
-    p.apply_proxy(Lossy(0.9));
+    p.apply_proxy(Lossy(1));
     return p;
 }

@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn src/index.ts",
-    "dev3": "concurrently \"ts-node-dev --respawn src/demos/3fold/s1.ts\" \"ts-node-dev --respawn src/demos/3fold/s2.ts\" \"ts-node-dev --respawn src/demos/3fold/s3.ts\""
+    "dev": "concurrently \"ts-node-dev --respawn src/demos/server/index.ts\" \"ts-node-dev --respawn src/demos/server/index2.ts\"",
+    "dev3": "concurrently \"ts-node-dev --respawn src/demos/3fold/s1.ts\" \"ts-node-dev --respawn src/demos/3fold/s2.ts\" \"ts-node-dev --respawn src/demos/3fold/s3.ts\"",
+
+    
+    "devA": "ts-node-dev --respawn src/demos/3fold/s1.ts",
+    "devB": "ts-node-dev --respawn src/demos/3fold/s2.ts"
   },
   "keywords": [],
   "author": "",

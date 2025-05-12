@@ -2,6 +2,7 @@ import Message from "../../base/message";
 import HTTPClientCommunicator from "../../communicator/http_client";
 import Address from "../../base/address";
 import { initCore } from "../../communicator/core";
+import { subscribe_to } from "../../base/event_pool";
 
 const core1_id = "core1";
 const core2_id = "core2";
@@ -18,7 +19,7 @@ const httpOut = new HTTPClientCommunicator(
 
 // Message
 const msg = new Message(
-    new Address(core1_id, "agent1"),
+    core1_address,
     "Awesome content!!!"
 )
 

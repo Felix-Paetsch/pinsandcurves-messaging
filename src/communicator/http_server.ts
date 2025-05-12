@@ -27,8 +27,10 @@ export default class HTTPServerCommunicator extends Communicator {
         res: http.ServerResponse
     ): void {
         if (req.method !== 'POST') {
-            res.statusCode = 405;
-            res.end(`error: only POST allowed`);
+            if (!res.writableEnded) {
+                res.statusCode = 405;
+                res.end(`error: only POST allowed`);
+            }
             return;
         }
 
@@ -38,38 +40,46 @@ export default class HTTPServerCommunicator extends Communicator {
             try {
                 const msg = Message.deserialize(body);
 
-                if (msg.target.agrees_with(this)) {
-                    return this.recieve_http_request(msg, res);
-                }
-
-                this.send(msg);
                 res.statusCode = 200;
                 res.end('ok');
+                this.incomming_message(msg);
             } catch (err: any) {
+                if (!res.writableEnded) {
+                    res.statusCode = 400;
+                    res.end(`error: ${err.message || 'invalid message'}`);
+                }
                 this.internal_event("MSG_ERROR", {
                     message: new Message(this.get_address()),
-                    err: CommunicationError.ERROR_RESPONSE
+                    err,
+                    err_type: CommunicationError.ERROR_RESPONSE
                 });
-                res.statusCode = 400;
-                res.end(`error: ${err.message || 'invalid message'}`);
             }
         });
 
-        req.on('error', () => {
+        req.on('error', (err) => {
+            if (!res.writableEnded) {
+                res.statusCode = 500;
+                res.end(`error: communication failed`);
+            }
             this.internal_event("MSG_ERROR", {
                 message: new Message(this.get_address()),
-                err: CommunicationError.COMMUNICATION_FAILED
+                err,
+                err_type: CommunicationError.COMMUNICATION_FAILED
             });
-            res.statusCode = 500;
-            res.end(`error: communication failed`);
         });
     }
 
-    recieve_http_request(msg: Message, res: http.ServerResponse<http.IncomingMessage>) {
-        res.statusCode = 200;
-        res.end('ok');
-        this.receive(msg);
+    transmit_message() {
+        throw new Error("HTTPServerComminicator can't send messages!");
     }
+
+    /*
+        recieve_http_request(msg: Message, res: http.ServerResponse<http.IncomingMessage>) {
+            res.statusCode = 200;
+            res.end('ok');
+            this.send(msg);
+        }
+    */
 
     public close(): void {
         this.server.close();

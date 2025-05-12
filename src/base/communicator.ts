@@ -3,7 +3,7 @@ import Core from "../communicator/core";
 import { IProxyCommunicator, ProxyCommunicator } from "../communicator/proxy";
 import Address from "./address";
 import { communicator_event, CommunicatorEventType } from "./event_pool";
-import Message from "./message";
+import Message, { IPreMessage } from "./message";
 import { Middleware, MessageListener } from "./middleware";
 
 type CommunicatorType = string;
@@ -13,7 +13,11 @@ export type InternalEvent = CommunicatorEventType;
 export interface ICommunicator {
     type: CommunicatorType;
     modality: CommunicatorModality;
-    send(msg: Message): void;
+
+    send(msg: IPreMessage): void;
+    incomming_message(msg: Message): void;  // A message came from the outside world and want to go to core
+    outgoing_message(msg: Message): void;   // A message came from core and wants to go to the outside world
+
     transmit_message(msg: Message): void;
     receive(msg: Message): void;
     get_address(): Address;
@@ -22,13 +26,15 @@ export interface ICommunicator {
     listen(m: MessageListener): void;
     proxify(): IProxyCommunicator;
 
+    internal_event: (event: InternalEvent, data: any) => void;
+
     // Sugar;
     message(content: string): void;
 }
 
 export default class Communicator implements ICommunicator {
-    private middleware: Middleware[] = [];
-    private msg_listeners: MessageListener[] = [];
+    public middleware: Middleware[] = [];
+    public msg_listeners: MessageListener[] = [];
 
     constructor(
         private address: Address,
@@ -41,12 +47,40 @@ export default class Communicator implements ICommunicator {
         }
     }
 
-    send(msg: Message) {
+    send(msg: IPreMessage) {
+        if (!(msg instanceof Message)) {
+            msg = msg.set_target(this.get_address());
+        }
+
+        Core().send(msg);
+    }
+
+    incomming_message(msg: Message): void {
         msg.computed_data = {
             message: msg,
             local_address: this.get_address(),
             communicator: this,
-            incomming: this.get_address().agrees_with(msg.target)
+            message_state: "incomming"
+        };
+
+        let idx = 0;
+        const runNext = () => {
+            const mw = this.middleware[idx++];
+            if (mw) {
+                mw(msg, runNext);
+            } else {
+                Core().incomming_message(msg);
+            }
+        };
+        runNext();
+    }
+
+    outgoing_message(msg: Message): void {
+        msg.computed_data = {
+            message: msg,
+            local_address: this.get_address(),
+            communicator: this,
+            message_state: "outgoing"
         };
 
         let idx = 0;
@@ -59,6 +93,7 @@ export default class Communicator implements ICommunicator {
             }
         };
         runNext();
+
     }
 
     transmit_message(msg: Message) {
