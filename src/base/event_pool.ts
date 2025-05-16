@@ -1,8 +1,10 @@
 import { ICommunicator } from "./communicator";
 import { v4 as uuidv4 } from "uuid";
 import { CommunicatorError } from "./communicator_error";
+import { getConfig } from "../config";
 
 export type CommunicatorEventType = "ERROR" | "INITIALIZED" | "RECEIVE_MSG" | "FREEFORM";
+
 export type CommunicatorEvent = {
     type: CommunicatorEventType,
     data: any,
@@ -54,6 +56,15 @@ export function communicator_event(
     trigger: ICommunicator
 ): void {
     const ev = { type, data, trigger } as CommunicatorEvent;
-    listenersByType.get(type)?.forEach(fn => fn(ev));
-    listenersByType.get("ALL")?.forEach(fn => fn(ev));
+
+    // Get listeners for this specific event type and "ALL"
+    const typeListeners = listenersByType.get(type);
+    const allListeners = listenersByType.get("ALL");
+
+    typeListeners?.forEach(fn => fn(ev));
+    allListeners?.forEach(fn => fn(ev));
+
+    if (type === "ERROR") {
+        getConfig().hard_errors && data.error.throw_if_unhandled();
+    }
 }
