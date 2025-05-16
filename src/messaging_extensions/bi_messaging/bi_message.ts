@@ -3,7 +3,7 @@ import Message, { IPreMessage, MessageMetaData } from "../../base/message";
 import { Middleware } from "../../base/middleware";
 import { v4 as uuidv4 } from 'uuid';
 import Core from "../../communicator/core";
-import { CommunicationError } from "../../base/communication_error";
+import { CommunicatorError } from "../../base/communicator_error";
 
 const biMessages: Array<BidirectionalMessage> = [];
 
@@ -61,31 +61,27 @@ export default class BidirectionalMessage extends Message {
     }
 
     resolve(msg: Message) {
-        if (this.res == null) {
-            throw this.#no_promise_error();
-        }
-
+        if (!this.res) throw this.#no_promise_error();
+        this.res_rej_value = msg;
+        this.state = "fullfilled";
         this.res(msg);
         this.res = null;
         this.rej = null;
-        this.state = "fullfilled";
-        this.res_rej_value = msg;
+        return msg;
     }
 
     reject(reason: any) {
-        if (this.rej == null) {
-            throw this.#no_promise_error();
-        }
+        if (!this.rej) throw this.#no_promise_error();
+        this.res_rej_value = reason;
+        this.state = "rejected";
         this.rej(reason);
         this.res = null;
         this.rej = null;
-        this.state = "rejected";
-        this.state = "fullfilled";
-        this.res_rej_value = reason;
+        return reason;
     }
 
     #no_promise_error() {
-        return new Error("Promise has already been handled!");
+        return new CommunicatorError("INTERNAL_ERROR", "Promise has already been handled!");
     }
 }
 
@@ -125,12 +121,12 @@ export const bi_middleware = (incomming_message_handler: IncommingMessageHandler
             }
 
             return msg.computed_data?.communicator.internal_event(
-                "MSG_ERROR", {
-                message: msg,
-                err: new Error("Bidirectional response without request"),
-                err_type: CommunicationError.COMMUNICATION_FAILED
-            }
-            )
+                "ERROR",
+                {
+                    error: new CommunicatorError("INVALID_MESSAGE", "Bidirectional response without request"),
+                    message: msg
+                }
+            );
         }
 
         // Message that reached the other side
@@ -138,7 +134,7 @@ export const bi_middleware = (incomming_message_handler: IncommingMessageHandler
             return incomming_message_handler(msg, response_builder(msg), next);
         }
 
-        throw new Error("Unreachable state");
+        throw new CommunicatorError("INTERNAL_ERROR", "Unreachable state");
     }
 
     return computed_middleware as Middleware;

@@ -109,7 +109,7 @@ export default class Communicator implements ICommunicator {
             ml(msg);
         }
 
-        this.internal_event("RECIEVE_MSG", msg);
+        this.internal_event("RECEIVE_MSG", msg);
     }
 
     agrees_with(target: Address | ICommunicator): boolean {

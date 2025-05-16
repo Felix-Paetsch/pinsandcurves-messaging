@@ -4,7 +4,7 @@ import * as http from 'http';
 import Address from "../base/address";
 import Message from "../base/message";
 import Communicator from "../base/communicator";
-import { CommunicationError } from "../base/communication_error";
+import { CommunicatorError } from "../base/communicator_error";
 
 export default class HTTPServerCommunicator extends Communicator {
     private server: http.Server;
@@ -18,7 +18,9 @@ export default class HTTPServerCommunicator extends Communicator {
         });
         this.server.on('error', (e) => {
             this.modality = "INACTIVE";
-            this.internal_event("INIT_ERROR", e);
+            this.internal_event("ERROR", {
+                error: new CommunicatorError("INITIALIZATION_FAILED", `Failed to initialize HTTP server: ${e.message}`, e)
+            });
         });
     }
 
@@ -39,42 +41,41 @@ export default class HTTPServerCommunicator extends Communicator {
         req.on('end', () => {
             try {
                 const msg = Message.deserialize(body);
-
                 res.statusCode = 200;
                 res.end('ok');
                 this.incomming_message(msg);
             } catch (err: any) {
+                const error = new CommunicatorError("INVALID_MESSAGE", err.message || 'Invalid message format', err);
                 if (!res.writableEnded) {
                     res.statusCode = 400;
-                    res.end(`error: ${err.message || 'invalid message'}`);
+                    res.end(`error: ${error.message}`);
                 }
-                this.internal_event("MSG_ERROR", {
-                    message: new Message(this.get_address()),
-                    err,
-                    err_type: CommunicationError.ERROR_RESPONSE
+                this.internal_event("ERROR", {
+                    error,
+                    message: new Message(this.get_address())
                 });
             }
         });
 
         req.on('error', (err) => {
+            const error = new CommunicatorError("COMMUNICATION_FAILED", "Request processing failed", err);
             if (!res.writableEnded) {
                 res.statusCode = 500;
-                res.end(`error: communication failed`);
+                res.end(`error: ${error.message}`);
             }
-            this.internal_event("MSG_ERROR", {
-                message: new Message(this.get_address()),
-                err,
-                err_type: CommunicationError.COMMUNICATION_FAILED
+            this.internal_event("ERROR", {
+                error,
+                message: new Message(this.get_address())
             });
         });
     }
 
     transmit_message() {
-        throw new Error("HTTPServerComminicator can't send messages!");
+        throw new CommunicatorError("INTERNAL_ERROR", "HTTPServerCommunicator can't send messages");
     }
 
     /*
-        recieve_http_request(msg: Message, res: http.ServerResponse<http.IncomingMessage>) {
+        receive_http_request(msg: Message, res: http.ServerResponse<http.IncomingMessage>) {
             res.statusCode = 200;
             res.end('ok');
             this.send(msg);

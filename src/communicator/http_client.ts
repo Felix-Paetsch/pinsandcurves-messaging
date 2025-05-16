@@ -7,7 +7,7 @@ import { IncomingMessage } from 'http';
 import Address from "../base/address";
 import Message from "../base/message";
 import Communicator from "../base/communicator";
-import { CommunicationError } from "../base/communication_error";
+import { CommunicatorError } from "../base/communicator_error";
 import Core from './core';
 
 export default class HTTPClientCommunicator extends Communicator {
@@ -37,10 +37,9 @@ export default class HTTPClientCommunicator extends Communicator {
         });
 
         req.on('error', (e) => {
-            this.internal_event("MSG_ERROR", {
-                message: msg,
-                err: e,
-                err_type: CommunicationError.COMMUNICATION_FAILED
+            this.internal_event("ERROR", {
+                error: new CommunicatorError("COMMUNICATION_FAILED", `Failed to send HTTP request: ${e.message}`, e),
+                message: msg
             });
         });
 
@@ -55,17 +54,17 @@ export default class HTTPClientCommunicator extends Communicator {
         res.on('data', chunk => { body += chunk; });
         res.on('end', () => {
             if (statusCode === undefined) {
-                this.internal_event("MSG_ERROR", {
-                    message: msg,
-                    err_type: CommunicationError.INACCESSIBLE
+                this.internal_event("ERROR", {
+                    error: new CommunicatorError("INACCESSIBLE", "No status code received from server"),
+                    message: msg
                 });
                 return;
             }
 
             if (statusCode < 200 || statusCode >= 300) {
-                this.internal_event("MSG_ERROR", {
-                    message: msg,
-                    err_type: CommunicationError.ERROR_RESPONSE
+                this.internal_event("ERROR", {
+                    error: new CommunicatorError("ERROR_RESPONSE", `Server responded with status ${statusCode}`),
+                    message: msg
                 });
                 return;
             }
@@ -77,9 +76,9 @@ export default class HTTPClientCommunicator extends Communicator {
             }
 
             if (text.toLowerCase().startsWith("error")) {
-                this.internal_event("MSG_ERROR", {
-                    message: msg,
-                    err_type: CommunicationError.ERROR_RESPONSE
+                this.internal_event("ERROR", {
+                    error: new CommunicatorError("ERROR_RESPONSE", `Server error: ${text}`),
+                    message: msg
                 });
                 return;
             }
@@ -87,16 +86,16 @@ export default class HTTPClientCommunicator extends Communicator {
             try {
                 const response = Message.deserialize(text);
                 Core().send(response);
-            } catch {
-                this.internal_event("MSG_ERROR", {
-                    message: msg,
-                    err_type: CommunicationError.ERROR_RESPONSE
+            } catch (error) {
+                this.internal_event("ERROR", {
+                    error: new CommunicatorError("INVALID_MESSAGE", "Failed to deserialize response message", error instanceof Error ? error : undefined),
+                    message: msg
                 });
             }
         });
     }
 
     receive(_msg: Message): void {
-        throw new Error("HTTPOutCommunicator does not support receiving messages.");
+        throw new CommunicatorError("INTERNAL_ERROR", "HTTPOutCommunicator does not support receiving messages");
     }
 }

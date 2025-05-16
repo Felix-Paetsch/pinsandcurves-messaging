@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Communicator, { ICommunicator, InternalEvent } from "../base/communicator";
 import Address from "../base/address";
 import Message, { IPreMessage } from '../base/message';
-import { CommunicationError } from '../base/communication_error';
+import { CommunicatorError } from '../base/communicator_error';
 
 export class CoreCommunicator extends Communicator {
     private known_addresses: Address[] = [this.get_address()];
@@ -82,9 +82,9 @@ export class CoreCommunicator extends Communicator {
         }
 
         if (msg.target.host_id == this.host_id) {
-            return this.internal_event("MSG_ERROR", {
-                message: msg,
-                err_type: CommunicationError.UNKNOWN_TARGET
+            return this.internal_event("ERROR", {
+                error: new CommunicatorError("UNKNOWN_TARGET", `No communicator found for target ${msg.target.plugin_id} on this host`),
+                message: msg
             });
         }
 
@@ -97,15 +97,15 @@ export class CoreCommunicator extends Communicator {
             }
         }
 
-        return this.internal_event("MSG_ERROR", {
-            message: msg,
-            err_type: CommunicationError.UNKNOWN_TARGET
+        return this.internal_event("ERROR", {
+            error: new CommunicatorError("UNKNOWN_TARGET", `No route found to host ${msg.target.host_id}`),
+            message: msg
         });
     }
 
     add_known_address(address: Address) {
         if (!address.get_communicator()) {
-            throw new Error("Address doesn't have associated communicator!");
+            throw new CommunicatorError("INTERNAL_ERROR", "Address doesn't have associated communicator");
         }
 
         for (let i = 0; i < this.known_addresses.length; i++) {
@@ -127,7 +127,9 @@ export class CoreCommunicator extends Communicator {
 let coreInstance: CoreCommunicator | null = null;
 
 export function initCore(host?: string | CoreCommunicator, overwrite: Boolean = false): CoreCommunicator {
-    if (coreInstance && !overwrite) throw new Error("Core already initialized.");
+    if (coreInstance && !overwrite) {
+        throw new CommunicatorError("INTERNAL_ERROR", "Core already initialized");
+    }
     if (host instanceof CoreCommunicator) {
         coreInstance = host;
         return coreInstance;

@@ -18,7 +18,7 @@ Core().use(
 )
 
 /*
-    subscribe_to("RECIEVE_MSG", (e) => {
+    subscribe_to("RECEIVE_MSG", (e) => {
         console.log(e.data);
     });
 
