@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import Communicator, { ICommunicator, InternalEvent } from "../base/communicator";
+import Communicator from "../base/communicator";
 import Address from "../base/address";
 import Message, { IPreMessage } from '../base/message';
 import { CommunicatorError } from '../base/communicator_error';
@@ -24,12 +24,7 @@ export class CoreCommunicator extends Communicator {
     }
 
     incomming_message(msg: Message): void {
-        msg.computed_data = {
-            message: msg,
-            local_address: this.get_address(),
-            communicator: this,
-            message_state: "incomming"
-        };
+        msg.set_communicator_environment(this, "incomming");
 
         let idx = 0;
         const runNext = () => {
@@ -44,12 +39,7 @@ export class CoreCommunicator extends Communicator {
     }
 
     outgoing_message(msg: Message): void {
-        msg.computed_data = {
-            message: msg,
-            local_address: this.get_address(),
-            communicator: this,
-            message_state: "outgoing"
-        };
+        msg.set_communicator_environment(this, "outgoing");
 
         let idx = 0;
         const runNext = () => {

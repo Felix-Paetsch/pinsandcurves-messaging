@@ -7,3 +7,7 @@ Meta is JSON for convenience
 
 Todo:
 HTTP Server Respond with Message make easier
+
+Todo:
+Logging Proxy Wrapper
+Saving logs to somewhere

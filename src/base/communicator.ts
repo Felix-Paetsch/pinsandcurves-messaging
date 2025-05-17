@@ -56,12 +56,7 @@ export default class Communicator implements ICommunicator {
     }
 
     incomming_message(msg: Message): void {
-        msg.computed_data = {
-            message: msg,
-            local_address: this.get_address(),
-            communicator: this,
-            message_state: "incomming"
-        };
+        msg.set_communicator_environment(this, "incomming");
 
         let idx = 0;
         const runNext = () => {
@@ -76,12 +71,7 @@ export default class Communicator implements ICommunicator {
     }
 
     outgoing_message(msg: Message): void {
-        msg.computed_data = {
-            message: msg,
-            local_address: this.get_address(),
-            communicator: this,
-            message_state: "outgoing"
-        };
+        msg.set_communicator_environment(this, "outgoing");
 
         let idx = 0;
         const runNext = () => {
@@ -97,6 +87,7 @@ export default class Communicator implements ICommunicator {
     }
 
     transmit_message(msg: Message) {
+        msg.set_communicator_environment(this, "transmitting");
         if (msg.target.agrees_with(this.address)) {
             return this.receive(msg);
         } else {
@@ -105,6 +96,7 @@ export default class Communicator implements ICommunicator {
     }
 
     receive(msg: Message) {
+        msg.set_communicator_environment(this, "recieving");
         for (const ml of this.msg_listeners) {
             ml(msg);
         }

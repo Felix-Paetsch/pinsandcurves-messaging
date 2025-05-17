@@ -1,5 +1,5 @@
 import { addresses, client_comm, server_comm } from "./addresses";
-import { bi_middleware } from "../../messaging_extensions/bi_messaging/bi_message";
+import { bi_middleware } from "../../messaging_extensions/middleware/bi_messaging";
 import { PreMessage } from "../../base/message";
 import { subscribe_to } from "../../base/event_pool";
 import Core, { initCore } from "../../communicator/core";

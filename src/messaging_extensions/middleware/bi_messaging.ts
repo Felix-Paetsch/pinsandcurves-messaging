@@ -124,8 +124,7 @@ export const bi_middleware = (incomming_message_handler: IncommingMessageHandler
 
         // Handle error responses
         if (msg.meta_data.bidirectional_messages.type === "error_response") {
-            // Throw as communicator event
-            return msg.computed_data?.communicator.internal_event(
+            return msg.computed_data?.communicator!.internal_event(
                 "ERROR",
                 {
                     error: new CommunicatorError("ERROR_RESPONSE", msg.content || "Received error response"),
@@ -136,9 +135,9 @@ export const bi_middleware = (incomming_message_handler: IncommingMessageHandler
 
         // A bidirectional message getting send (through)
         if (
-            msg.computed_data?.message_state == "outgoing"
+            msg.computed_data?.message_state === "outgoing"
             || (
-                msg.computed_data?.message_state == "incomming"
+                msg.computed_data?.message_state === "incomming"
                 && !msg.target.agrees_with(Core())
             )
         ) {
@@ -146,7 +145,7 @@ export const bi_middleware = (incomming_message_handler: IncommingMessageHandler
         }
 
         // If it is a message that is comming back to here
-        if (msg.meta_data.bidirectional_messages.type == "response") {
+        if (msg.meta_data.bidirectional_messages.type === "response") {
             for (let i = 0; i < biMessages.length; i++) {
                 if (
                     biMessages[i].meta_data.bidirectional_messages.id ===
@@ -172,14 +171,15 @@ export const bi_middleware = (incomming_message_handler: IncommingMessageHandler
         }
 
         // Message that reached the other side
-        if (msg.target.agrees_with(msg.computed_data?.communicator!) && msg.computed_data?.message_state == "incomming") {
+        if (msg.target.agrees_with(msg.computed_data?.communicator!) && msg.computed_data?.message_state === "incomming") {
             return incomming_message_handler(msg, response_builder(msg), next);
         }
 
         throw new CommunicatorError("INTERNAL_ERROR", "Unreachable state");
     }
 
-    return computed_middleware as Middleware;
+    computed_middleware.middleware_name = "bi_messaging";
+    return computed_middleware;
 }
 
 function response_builder(msg: Message) {
