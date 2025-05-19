@@ -179,7 +179,7 @@ export const bi_middleware = (incomming_message_handler: IncommingMessageHandler
     }
 
     computed_middleware.middleware_name = "bi_messaging";
-    return computed_middleware;
+    return computed_middleware as Middleware;
 }
 
 function response_builder(msg: Message) {
