@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import uuidv4 from "../utils/uuid";
 import Communicator from "../base/communicator";
 import Address from "../base/address";
 import Message, { IPreMessage } from '../base/message';

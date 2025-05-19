@@ -1,6 +1,6 @@
 import Message from "../../base/message";
 import { CoreCommunicator } from "../core";
-import { v4 as uuidv4 } from 'uuid';
+import uuidv4 from "../../utils/uuid";
 
 export default class MockCoreCommunicator extends CoreCommunicator {
     constructor(public host_id: string = uuidv4()) {

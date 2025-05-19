@@ -1,7 +1,7 @@
 import Core from "../communicator/core";
 import { ICommunicator } from "./communicator";
 import Message from "./message";
-import { v4 as uuidv4 } from 'uuid';
+import uuidv4 from "../utils/uuid";
 
 export default class Address {
     constructor(

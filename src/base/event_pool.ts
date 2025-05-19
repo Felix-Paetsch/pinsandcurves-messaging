@@ -1,5 +1,5 @@
 import { ICommunicator } from "./communicator";
-import { v4 as uuidv4 } from "uuid";
+import uuidv4 from "../utils/uuid";
 import { CommunicatorError } from "./communicator_error";
 import { getConfig } from "../config";
 

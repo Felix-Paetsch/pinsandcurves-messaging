@@ -1,7 +1,7 @@
 import Address from "../../base/address";
 import Message, { IPreMessage, MessageMetaData } from "../../base/message";
 import { Middleware } from "../../base/middleware";
-import { v4 as uuidv4 } from 'uuid';
+import uuidv4 from "../../utils/uuid";
 import Core from "../../communicator/core";
 import { CommunicatorError } from "../../base/communicator_error";
 
