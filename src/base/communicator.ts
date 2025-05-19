@@ -13,6 +13,7 @@ export type InternalEvent = CommunicatorEventType;
 export interface ICommunicator {
     type: CommunicatorType;
     modality: CommunicatorModality;
+    middleware: Middleware[];
 
     send(msg: IPreMessage): void;
     incomming_message(msg: Message): void;  // A message came from the outside world and want to go to core

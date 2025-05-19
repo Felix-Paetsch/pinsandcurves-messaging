@@ -13,6 +13,20 @@ export type LogContext = {
     [key: string]: any;
 };
 
+export class MessageLogger {
+    private logs: MessageLog[] = [];
+
+    log(message: Message, stack_skip_level: number = 0, context: Record<string, any> = {}): MessageLog {
+        const log = new MessageLog(message, stack_skip_level + 2, context);
+        this.logs.push(log);
+        return log;
+    }
+
+    get_logs(): readonly MessageLog[] {
+        return this.logs;
+    }
+}
+
 export class MessageLog {
     public readonly message: Message;
     public readonly timestamp: number;
@@ -49,17 +63,6 @@ export class MessageLog {
     }
 }
 
-export class MessageLogger {
-    private logs: MessageLog[] = [];
-
-    log(message: Message, stack_skip_level: number = 0, context: Record<string, any> = {}): MessageLog {
-        const log = new MessageLog(message, stack_skip_level + 2, context);
-        this.logs.push(log);
-        return log;
-    }
-
-    get_logs(): readonly MessageLog[] {
-        return this.logs;
-    }
-}
+export const defaultLogger = new MessageLogger();
+export default defaultLogger;
 

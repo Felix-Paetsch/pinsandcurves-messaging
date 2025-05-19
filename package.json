@@ -1,14 +1,15 @@
 {
   "name": "core",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "dev": "concurrently \"ts-node-dev --respawn src/demos/server/index.ts\" \"ts-node-dev --respawn src/demos/server/index2.ts\"",
     "dev3": "concurrently \"ts-node-dev --respawn src/demos/3fold/s1.ts\" \"ts-node-dev --respawn src/demos/3fold/s2.ts\" \"ts-node-dev --respawn src/demos/3fold/s3.ts\"",
-
-    
     "devA": "ts-node-dev --respawn src/demos/3fold/s1.ts",
-    "devB": "ts-node-dev --respawn src/demos/3fold/s2.ts"
+    "devB": "ts-node-dev --respawn src/demos/3fold/s2.ts",
+    "build": "webpack --mode production",
+    "build:dev": "webpack --mode development",
+    "watch": "webpack --mode development --watch"
   },
   "keywords": [],
   "author": "",
@@ -19,7 +20,10 @@
     "@types/uuid": "^10.0.0",
     "concurrently": "^9.1.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4",
+    "ts-loader": "^9.5.1"
   },
   "dependencies": {
     "uuid": "^11.1.0"
