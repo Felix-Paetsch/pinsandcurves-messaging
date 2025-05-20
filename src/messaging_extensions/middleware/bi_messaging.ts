@@ -1,16 +1,25 @@
 import Address from "../../base/address";
 import Message, { IPreMessage, MessageMetaData } from "../../base/message";
 import { Middleware } from "../../base/middleware";
-import uuidv4 from "../../utils/uuid";
+import uuidv4, { UUID } from "../../utils/uuid";
 import Core from "../../communicator/core";
 import { CommunicatorError } from "../../base/communicator_error";
 
 const biMessages: Array<BidirectionalMessage> = [];
 
 // Helper to remove a message from biMessages by id
-function removeBiMessageById(id: string) {
+function removeBiMessageById(id: UUID) {
     const idx = biMessages.findIndex(m => m.meta_data.bidirectional_messages?.id === id);
     if (idx !== -1) biMessages.splice(idx, 1);
+}
+
+interface BidirectionalMessageMetaData extends MessageMetaData {
+    bidirectional_messages?: {
+        readonly timeout_after: number;
+        readonly id: UUID;
+        readonly type: "request" | "response" | "error_response";
+        readonly source: string;
+    }
 }
 
 // Only moddles outgoing bidirectional
@@ -26,7 +35,7 @@ export default class BidirectionalMessage extends Message {
     constructor(
         public target: Address,
         public content: string = "",
-        public meta_data: MessageMetaData = {},
+        public meta_data: BidirectionalMessageMetaData = {},
         readonly timeout_after: number = 3000 // ms
     ) {
         super(target, content, meta_data);
@@ -50,7 +59,7 @@ export default class BidirectionalMessage extends Message {
         this.timeout_handle = setTimeout(() => {
             if (this.state === "pending") {
                 this.reject(new CommunicatorError("ERROR_RESPONSE", `Timeout after ${this.timeout_after}ms waiting for response`));
-                removeBiMessageById(this.meta_data.bidirectional_messages.id);
+                removeBiMessageById(this.meta_data.bidirectional_messages!.id);
             }
         }, this.timeout_after);
     }
@@ -89,7 +98,7 @@ export default class BidirectionalMessage extends Message {
         this.res(msg);
         this.res = null;
         this.rej = null;
-        removeBiMessageById(this.meta_data.bidirectional_messages.id);
+        removeBiMessageById(this.meta_data.bidirectional_messages!.id);
         return msg;
     }
 
@@ -101,7 +110,7 @@ export default class BidirectionalMessage extends Message {
         this.rej(reason);
         this.res = null;
         this.rej = null;
-        removeBiMessageById(this.meta_data.bidirectional_messages.id);
+        removeBiMessageById(this.meta_data.bidirectional_messages!.id);
         return reason;
     }
 
@@ -124,7 +133,7 @@ export const bi_middleware = (incomming_message_handler: IncommingMessageHandler
 
         // Handle error responses
         if (msg.meta_data.bidirectional_messages.type === "error_response") {
-            return msg.computed_data?.communicator!.internal_event(
+            return msg.computed_data?.communicator?.internal_event(
                 "ERROR",
                 {
                     error: new CommunicatorError("ERROR_RESPONSE", msg.content || "Received error response"),
@@ -148,7 +157,7 @@ export const bi_middleware = (incomming_message_handler: IncommingMessageHandler
         if (msg.meta_data.bidirectional_messages.type === "response") {
             for (let i = 0; i < biMessages.length; i++) {
                 if (
-                    biMessages[i].meta_data.bidirectional_messages.id ===
+                    biMessages[i].meta_data.bidirectional_messages?.id ===
                     msg.meta_data.bidirectional_messages.id
                 ) {
                     const r = biMessages.splice(i, 1)[0];

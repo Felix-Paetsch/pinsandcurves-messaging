@@ -9,7 +9,7 @@
     "devB": "ts-node-dev --respawn src/demos/3fold/s2.ts",
     
     "build:esm": "tsc --module ESNext --outDir dist/esm",
-    "build_dev:esm": "tsc --module ESNext --outDir dist/esm --watch"
+    "build_watch:esm": "tsc --module ESNext --outDir dist/esm --watch"
   },
   "keywords": [],
   "author": "",

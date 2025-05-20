@@ -11,3 +11,6 @@ HTTP Server Respond with Message make easier
 Todo:
 Logging Proxy Wrapper
 Saving logs to somewhere
+
+Eventually:
+Make this into a library. Split versions between nodejs env and browser env

@@ -1,5 +1,5 @@
 import { ICommunicator } from "./communicator";
-import uuidv4 from "../utils/uuid";
+import uuidv4, { UUID } from "../utils/uuid";
 import { CommunicatorError } from "./communicator_error";
 import { getConfig } from "../config";
 
@@ -27,8 +27,8 @@ const listenersByType = new Map<CommunicatorEventType | "ALL", Map<string, MsgPr
 export function subscribe_to(
     type: CommunicatorEventType | "ALL",
     method: MsgProcessFn,
-    signature: string = uuidv4()
-): string {
+    signature: UUID = uuidv4()
+): UUID {
     let bucket = listenersByType.get(type);
     if (!bucket) {
         bucket = new Map();
@@ -38,7 +38,7 @@ export function subscribe_to(
     return signature;
 }
 
-export function unsubscribe_from(idOrFn: string | MsgProcessFn): void {
+export function unsubscribe_from(idOrFn: UUID | MsgProcessFn): void {
     for (const bucket of listenersByType.values()) {
         if (typeof idOrFn === "string") {
             bucket.delete(idOrFn);

@@ -1,11 +1,11 @@
 import Core from "../communicator/core";
 import { ICommunicator } from "./communicator";
 import Message from "./message";
-import uuidv4 from "../utils/uuid";
+import uuidv4, { UUID } from "../utils/uuid";
 
 export default class Address {
     constructor(
-        public readonly host_id: string,
+        public readonly host_id: UUID,
         public readonly plugin_id: string = "core",
         private communicator: ICommunicator | null = null
     ) { }

@@ -1,4 +1,4 @@
-import uuidv4 from "../utils/uuid";
+import uuidv4, { UUID } from "../utils/uuid";
 import Communicator from "../base/communicator";
 import Address from "../base/address";
 import Message, { IPreMessage } from '../base/message';
@@ -6,7 +6,7 @@ import { CommunicatorError } from '../base/communicator_error';
 
 export class CoreCommunicator extends Communicator {
     private known_addresses: Address[] = [this.get_address()];
-    constructor(public host_id: string = uuidv4()) {
+    constructor(public host_id: UUID = uuidv4()) {
         super(new Address(host_id, "core"), "core", "MSG_ALL");
     }
 
@@ -124,7 +124,7 @@ export function initCore(host?: string | CoreCommunicator, overwrite: Boolean = 
         coreInstance = host;
         return coreInstance;
     }
-    coreInstance = new CoreCommunicator(host || uuidv4());
+    coreInstance = new CoreCommunicator(host ? host : uuidv4());
     return coreInstance;
 }
 
